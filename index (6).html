@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>NTM Class Test</title>
+<style>
+  :root{--bg:#f4f5f7;--card:#fff;--ink:#1d2433;--mute:#5b6476;--line:#dfe3ea;--acc:#1f4fd1;--acc2:#e8eefc;--ok:#137a3f;--bad:#b42318;--warn:#b54708;}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;}
+  body.locked{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .wrap{max-width:820px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px}
+  h1{font-size:1.35rem;margin:0 0 4px} .sub{color:var(--mute);margin:0 0 18px;font-size:.95rem}
+  label.f{display:block;font-weight:600;font-size:.9rem;margin:12px 0 4px}
+  input.t,textarea.t{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;font-size:1rem;background:#fff;color:var(--ink)}
+  input.t:focus,textarea.t:focus{outline:2px solid var(--acc);border-color:transparent}
+  textarea.t{min-height:260px;resize:vertical;line-height:1.5;font-family:inherit}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid transparent;padding:11px 18px}
+  .pri{background:var(--acc);color:#fff;font-weight:600} .pri:disabled{opacity:.5;cursor:default}
+  .ghost{background:transparent;border-color:var(--line);color:var(--mute)}
+  .rules{background:#fafbfc;border:1px solid var(--line);border-radius:8px;padding:12px 14px 12px 30px;font-size:.9rem;color:#333;margin:16px 0}
+  .rules li{margin:3px 0}
+  .agree{display:flex;gap:8px;align-items:flex-start;font-size:.92rem;margin:10px 0 16px}
+  .err{color:var(--bad);font-size:.92rem;min-height:1.3em;margin-top:8px}
+  .bar{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .bar .who{font-weight:600;flex:1;min-width:180px}
+  .pill{background:rgba(255,255,255,.12);border-radius:999px;padding:4px 12px;font-variant-numeric:tabular-nums;font-size:.9rem}
+  .pill.hot{background:var(--bad)} .pill.net{background:var(--warn)}
+  .meta{display:flex;justify-content:space-between;color:var(--mute);font-size:.88rem;margin-bottom:8px;gap:10px}
+  .qbar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:16px}
+  .qbar i{display:block;height:100%;background:var(--acc);transition:width 1s linear}
+  .qbar i.hot{background:var(--bad)}
+  .qtext{font-size:1.08rem;font-weight:500;margin:0 0 16px}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);color:var(--ink);margin:0 0 10px;padding:12px 14px}
+  .opt b{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:.85rem}
+  .opt.sel{border-color:var(--acc);background:var(--acc2)} .opt.sel b{background:var(--acc);border-color:var(--acc);color:#fff}
+  .cnt{display:flex;justify-content:space-between;color:var(--mute);font-size:.82rem;margin-top:6px}
+  .num{display:flex;gap:10px;align-items:center} .num input{max-width:260px} .num span{color:var(--mute)}
+  .hint{color:var(--mute);font-size:.85rem;margin-top:6px}
+  .act{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:10px}
+  .shield{position:fixed;inset:0;z-index:50;background:rgba(20,24,33,.96);color:#fff;display:none;align-items:center;justify-content:center;padding:24px;text-align:center}
+  .shield.on{display:flex} .shield .box{max-width:460px} .shield h2{margin:0 0 8px}
+  /* screen veil: hides the question whenever the window loses focus or a screenshot key is pressed */
+  body.veiled #qCard{visibility:hidden}
+  .veil{position:fixed;inset:0;z-index:45;background:#1d2433;color:#fff;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;font-weight:600}
+  body.veiled .veil{display:flex}
+  .wm{position:fixed;inset:-50px;z-index:40;pointer-events:none;overflow:hidden;opacity:.075;display:none;transition:transform 1.2s ease}
+  .wm.on{display:block}
+  .wm div{position:absolute;white-space:nowrap;font-weight:700;font-size:17px;transform:rotate(-28deg);color:#000}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;font-size:.9rem;z-index:60;display:none;max-width:90vw}
+  .done{text-align:center;padding:34px 22px} .score{font-size:3rem;font-weight:700;margin:10px 0}
+  .dl{margin-top:8px} .dlnote{color:var(--mute);font-size:.85rem;margin-top:10px}
+  .cam{position:fixed;left:10px;bottom:10px;z-index:46;width:112px;border-radius:8px;overflow:hidden;background:#000;box-shadow:0 2px 8px rgba(0,0,0,.35);display:none}
+  .cam.on{display:block} .cam video{width:100%;display:block;transform:scaleX(-1)}
+  .cam span{position:absolute;left:4px;top:3px;font-size:10px;color:#fff;background:rgba(180,35,24,.9);border-radius:4px;padding:0 5px}
+  .sketch-wrap{margin:14px 0;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fbfcff}
+  .sketch-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
+  .sketch-toolbar button{padding:6px 11px;font-size:.88rem}
+  .sketch-canvas{display:block;width:100%;height:260px;border:1px solid #c9ced8;border-radius:6px;background:#fff;touch-action:none;cursor:crosshair}
+  .sketch-note{font-size:.82rem;color:var(--mute);margin:5px 0 0}
+  .part{margin:0 0 12px} .part label{display:block;font-size:.92rem;margin-bottom:4px} .part .num input{max-width:220px}
+  .link{background:none;border:none;color:var(--acc);padding:6px 0;text-decoration:underline;font-size:.9rem}
+  .tt{border-collapse:collapse;width:100%;font-size:.88rem} .tt th,.tt td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}
+  .tt th{background:#f0f2f6;font-weight:600} .tt td.w{white-space:normal} .tt button{padding:5px 10px;font-size:.82rem}
+  .tt tr.live td{background:#fff8e6} .flag{color:var(--bad);font-weight:600}
+  .qa{border-bottom:1px solid var(--line);padding:12px 0} .qa .h{color:var(--acc);font-weight:600;font-size:.88rem} .qa pre{white-space:pre-wrap;font:inherit;margin:4px 0;background:#fcfae8;padding:6px 8px;border-radius:6px}
+  .qa .k{color:var(--ok);font-size:.88rem} .qa .m{color:var(--bad);font-weight:600;font-size:.9rem} .qa .fb{color:var(--mute);font-size:.84rem;white-space:pre-wrap}
+  .hide{display:none!important}
+  @media print{body{display:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="vLogin" class="wrap">
+  <div class="card">
+    <h1 id="title">NTM Class Test</h1>
+    <p class="sub" id="subtitle">Loading…</p>
+    <label class="f" for="usn">USN</label>
+    <input class="t" id="usn" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <label class="f" for="fullName">Full name (as in the official roster)</label>
+    <input class="t" id="fullName" autocomplete="name">
+    <label class="f" for="email">Registered email address</label>
+    <input class="t" id="email" type="email" autocomplete="email">
+    <label class="agree"><input type="checkbox" id="willing"> I confirm that I have studied the lesson and voluntarily wish to take this test. I understand that a verification code will be sent to my registered email address.</label>
+    <button class="pri" id="btnSendCode" type="button">Send email verification code</button>
+    <div id="otpBox" class="hide">
+      <label class="f" for="otp">Six-digit code from email</label>
+      <input class="t" id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+      <button class="pri" id="btnVerify" type="button">Verify email</button>
+    </div>
+    <div id="verifiedMsg" class="hide" style="color:#167d45;font-weight:600;margin:10px 0">Email verified.</div>
+    <div id="pwdBox" class="hide">
+      <label class="f" for="pwd">Password (for answer-sheet download only)</label>
+      <input class="t" id="pwd" type="password" autocomplete="current-password">
+    </div>
+    <div id="codeBox" class="hide">
+      <label class="f" for="code">Access code (given in class)</label>
+      <input class="t" id="code" autocomplete="off" spellcheck="false">
+    </div>
+    <ul class="rules" id="rules"></ul>
+    <label class="agree"><input type="checkbox" id="agree"> I will not switch tabs or windows, take screenshots or photos, or use notes, books, phones, AI tools or any other help. I agree to webcam monitoring during the test (snapshots are seen only by the instructor) and microphone sound-level monitoring. Audio is not recorded or uploaded; sustained sound activity may be flagged for instructor review. I understand the test will be auto-submitted on repeated confirmed violations.</label>
+    <button class="pri" id="btnStart" disabled>Start test</button>
+    <div class="err" id="loginErr"></div>
+    <button class="link" id="btnDlOnly">Already finished? Download my answer sheet</button>
+  </div>
+</div>
+
+<!-- TEST -->
+<div id="vTest" class="hide">
+  <div class="bar">
+    <span class="who" id="who"></span>
+    <span class="pill hide" id="pNet">Reconnecting…</span>
+    <span class="pill" id="pViol">Warnings 0/3</span>
+    <span class="pill" id="pTest">--:--</span>
+  </div>
+  <div class="wrap">
+    <div class="card" id="qCard">
+      <div class="meta"><span id="qNum"></span><span id="qTime"></span></div>
+      <div class="qbar"><i id="qFill"></i></div>
+      <p class="qtext" id="qText"></p>
+      <div id="qBody"></div>
+      <div class="act">
+        <button class="ghost" id="btnFinish">End test</button>
+        <button class="pri" id="btnNext">Save &amp; next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTRUCTOR CONSOLE (open the link with #teacher) -->
+<div id="vTeach" class="wrap hide" style="max-width:1100px">
+  <div class="card">
+    <h1>Instructor console</h1>
+    <p class="sub" id="tSub">View and download evaluated answer scripts.</p>
+    <div id="tLogin">
+      <label class="f" for="tPass">Instructor password</label>
+      <input class="t" id="tPass" type="password" autocomplete="current-password" style="max-width:320px">
+      <div style="margin-top:12px"><button class="pri" id="tGo">Open</button></div>
+    </div>
+    <div id="tMain" class="hide">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <input class="t" id="tFilter" placeholder="Search USN or name" style="max-width:260px">
+        <button class="ghost" id="tRefresh">Refresh</button>
+        <button class="ghost" id="tAll">Download all PDFs</button>
+        <span class="hint" id="tCount"></span>
+      </div>
+      <div style="overflow-x:auto"><table class="tt" id="tTable"></table></div>
+      <p class="hint" id="tAbsent"></p>
+    </div>
+    <div class="err" id="tErr"></div>
+  </div>
+  <div class="card hide" id="tView" style="margin-top:14px"></div>
+</div>
+
+<!-- DONE -->
+<div id="vDone" class="wrap hide">
+  <div class="card done">
+    <h1>Test submitted</h1>
+    <div class="score" id="dScore"></div>
+    <p class="sub" id="dReason"></p>
+    <div id="dlBox" class="hide">
+      <button class="pri dl" id="btnDl">Download answer sheet (PDF)</button>
+      <div class="dlnote" id="dlNote">Each download is a numbered, watermarked copy registered on the server. Any change to the PDF is detectable through its QR code.</div>
+    </div>
+    <p class="dlnote" id="dlMsg"></p>
+    <p class="sub" style="margin-top:18px">You may close this window.</p>
+  </div>
+</div>
+
+<div class="shield" id="shield"><div class="box">
+  <h2 id="shTitle">Return to the test</h2>
+  <p id="shMsg"></p>
+  <button class="pri" id="btnBack">Continue test in full screen</button>
+</div></div>
+<div class="shield" id="ask"><div class="box">
+  <h2>End the test now?</h2>
+  <p>Remaining questions will be marked unanswered. This cannot be undone.</p>
+  <button class="ghost" id="askNo" style="color:#fff;margin-right:8px">Go back</button>
+  <button class="pri" id="askYes">Yes, submit</button>
+</div></div>
+<div class="veil">Question hidden — keep this window focused. Screenshots and other apps are not allowed.</div>
+<div class="wm" id="wm"></div>
+<div class="cam" id="cam"><video id="camv" muted playsinline autoplay></video><span>● REC</span></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+  // When this page is hosted outside Apps Script (e.g. GitHub Pages — needed for the webcam),
+  // paste the web-app URL ending in /exec here. Leave empty when served by Apps Script itself.
+  var API_URL = 'https://script.google.com/macros/s/AKfycbz7I6XcvoAHt4ooLuu1VuaLV9DDI0G6hodMIfu5SZy6xw7TnofE40iq8zPyM1BLulBV/exec';
+  var $ = function(id){ return document.getElementById(id); };
+  var S = { emailToken:'', token:null, q:null, sel:null, busy:false, active:false, qEnd:0, tEnd:0, qLen0:1, keys:0,
+            viol:0, maxViol:3, fs:false, away:false, blurTimer:null, tick:null, ping:null, lastLog:{}, fp:'', dl:null, wmText:'' };
+  var NUM_RE = /^-?\d*\.?\d+([eE]-?\d+)?$|^-?\d+\.$/;
+
+  // ---------- server bridge (retries through short network failures) ----------
+  function call(fn){
+    var args = Array.prototype.slice.call(arguments,1);
+    if (window.google && google.script && google.script.run)
+      return new Promise(function(res,rej){
+        google.script.run.withSuccessHandler(res).withFailureHandler(function(e){ rej(e && e.message ? e : new Error(String(e))); })[fn].apply(null,args);
+      });
+    if (!API_URL) return Promise.reject(new Error('Test server address is not configured (API_URL).'));
+    // text/plain body = "simple" request: no CORS pre-flight, which Apps Script cannot answer
+    return fetch(API_URL, { method:'POST', body: JSON.stringify({ fn: fn, args: args }), redirect:'follow' })
+      .then(function(r){ if (!r.ok) throw new Error('Network error HTTP '+r.status); return r.json(); })
+      .then(function(o){ if (!o.ok) throw new Error(o.error); return o.data; });
+  }
+  function isNet(e){ return /network|connection|HTTP 0|failed to fetch|timed? ?out|busy|offline|NetworkError/i.test((e&&e.message)||String(e)); }
+  function callR(fn){
+    var args = arguments, tries = 0, t0 = Date.now();
+    return new Promise(function(res,rej){
+      (function go(){
+        call.apply(null,args).then(function(r){ net(false); res(r); }).catch(function(e){
+          if (isNet(e) && Date.now()-t0 < 180000){ net(true); tries++; setTimeout(go, Math.min(8000, 1000*tries)); }
+          else { net(false); rej(e); }
+        });
+      })();
+    });
+  }
+  function net(down){ $('pNet').classList.toggle('hide', !down); $('pNet').classList.toggle('net', down); }
+  function toast(msg){ var t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(function(){t.style.display='none';},2800); }
+  function mmss(ms){ ms=Math.max(0,ms); var s=Math.ceil(ms/1000); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  function show(v){ ['vLogin','vTest','vDone'].forEach(function(x){ $(x).classList.toggle('hide', x!==v); }); }
+
+  // ---------- device fingerprint (binds the attempt to this browser/device) ----------
+  function fingerprint(){
+    var parts=[navigator.userAgent, navigator.platform, navigator.language, screen.width+'x'+screen.height+'x'+screen.colorDepth,
+               (Intl.DateTimeFormat().resolvedOptions().timeZone||''), navigator.hardwareConcurrency||'', navigator.deviceMemory||''];
+    try{ var c=document.createElement('canvas'), x=c.getContext('2d'); c.width=220; c.height=30; x.textBaseline='top'; x.font='16px Arial';
+         x.fillStyle='#f60'; x.fillRect(100,1,62,20); x.fillStyle='#069'; x.fillText('NTM-fp µ₂ Ω',2,6); parts.push(c.toDataURL()); }catch(e){}
+    var s=parts.join('||');
+    if (window.crypto && crypto.subtle && window.TextEncoder){
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(b){
+        return Array.prototype.map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2);}).join('').slice(0,32); });
+    }
+    var h=0; for (var i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; } return Promise.resolve('h'+(h>>>0).toString(16));
+  }
+  fingerprint().then(function(f){ S.fp=f; });
+
+  // ---------- login page ----------
+  if (!teacherMode()) call('apiInfo').then(function(i){
+    $('title').textContent = i.title;
+    $('subtitle').textContent = i.nQ+' questions · '+i.max+' marks · '+i.duration+' minutes';
+    if (i.needCode) $('codeBox').classList.remove('hide');
+    S.maxViol = i.maxViol; S.info = i;
+    var r = [
+      'Verify your registered email before starting. Each student gets a different paper. Questions come one at a time; you cannot go back.',
+      'Each MCQ has '+i.mcqSec+' s and each numerical '+i.numSec+' s. When time runs out, your current answer is saved automatically.',
+      'Numericals: type only the number in the stated unit. Use a physical calculator only.',
+      (i.nProb ? i.nProb+' numerical problem(s) of '+i.probMarks+' marks with parts (a), (b), (c); '+Math.round(i.probSec/60)+' minutes each. Each part is marked separately.' : ''),
+      (i.nDesc ? i.nDesc+' descriptive question(s) of '+i.descMarks+' marks come last; '+Math.round(i.descSec/60)+' minutes each. Type in your own words. Sketch-and-explain questions require both a labelled freehand sketch and a written explanation. Your typing and sketch are saved automatically.' : ''),
+      (i.neg ? 'Wrong MCQ answers carry '+i.neg+' negative mark(s).' : 'There is no negative marking.'),
+      'The test runs in full screen. Leaving it, switching tabs/apps or minimising is recorded; after '+i.maxViol+' warnings the test is submitted automatically.',
+      'The question is hidden whenever this window loses focus. Copy, paste, right-click, printing and screenshots are blocked.',
+      (i.camera!=='OFF' ? 'Your webcam '+(i.camera==='REQUIRED'?'must stay on':'is used')+' for the whole test. Snapshots are taken regularly'+(i.phoneDetect?'; a phone in view, leaving your seat or covering the camera is detected and counts as a warning':'')+'. Keep your face and both ears visible where possible, and keep your phone away. Earpieces cannot be reliably detected automatically and may require instructor review of snapshots.' : 'Phones must be kept away.'),
+      'If microphone permission is granted, the browser checks sound level locally. It does not record or upload audio and cannot tell whether sound is speech or prove misconduct. Sustained sound may be flagged for instructor review; background noise can cause false alarms.',
+      'If your internet drops, stay on this page — it reconnects by itself. If the browser closes, log in again on the SAME device (maximum '+i.maxRelogin+' times). The clock keeps running and the question that was open is lost.',
+      (i.download ? 'After you finish you can download a watermarked, verifiable PDF of your answer sheet.' : '')
+    ].filter(String);
+    $('rules').innerHTML=''; r.forEach(function(x){ var li=document.createElement('li'); li.textContent=x; $('rules').appendChild(li); });
+    if (!i.open) $('loginErr').textContent='The test is not open yet. Wait for the instructor, then reload this page. (Finished students can still log in to download.)';
+    sync();
+  }).catch(function(e){ $('subtitle').textContent=''; $('loginErr').textContent=e.message; });
+
+  function sync(){ $('btnStart').disabled = !($('agree').checked && S.emailToken && $('usn').value.trim() && $('fullName').value.trim()); }
+  ['agree','usn','fullName','email','willing','otp'].forEach(function(id){ $(id).addEventListener('input',function(){ if(id==='usn'||id==='fullName'||id==='email'||id==='willing'){ S.emailToken=''; $('verifiedMsg').classList.add('hide'); } sync(); }); $(id).addEventListener('change',sync); });
+  $('btnSendCode').addEventListener('click',function(){
+    $('loginErr').textContent=''; $('btnSendCode').disabled=true; $('btnSendCode').textContent='Sending…';
+    call('apiRequestEmailCode',$('usn').value,$('fullName').value,$('email').value,$('willing').checked)
+      .then(function(r){ $('otpBox').classList.remove('hide'); $('loginErr').textContent='Verification code sent to '+r.maskedEmail+'. It expires in '+r.expiresIn+' minutes.'; $('loginErr').style.color='#167d45'; })
+      .catch(function(e){ $('loginErr').textContent=e.message; $('loginErr').style.color=''; })
+      .finally(function(){ $('btnSendCode').disabled=false; $('btnSendCode').textContent='Send email verification code'; });
+  });
+  $('btnVerify').addEventListener('click',function(){
+    $('loginErr').textContent=''; $('btnVerify').disabled=true; $('btnVerify').textContent='Verifying…';
+    call('apiVerifyEmailCode',$('usn').value,$('otp').value)
+      .then(function(r){ S.emailToken=r.token; $('verifiedMsg').classList.remove('hide'); $('loginErr').textContent='Email verified successfully. You may start the test when ready.'; $('loginErr').style.color='#167d45'; sync(); })
+      .catch(function(e){ $('loginErr').textContent=e.message; $('loginErr').style.color=''; })
+      .finally(function(){ $('btnVerify').disabled=false; $('btnVerify').textContent='Verify email'; });
+  });
+
+  $('btnStart').addEventListener('click', function(){
+    $('loginErr').textContent=''; $('btnStart').disabled=true; $('btnStart').textContent='Starting…';
+    enterFs(); // must run inside the click
+    var camP = (S.info && S.info.camera!=='OFF') ? startCamera().then(function(){ return true; }, function(e){ return e; }) : Promise.resolve(false);
+    var go = function(){
+     camP.then(function(cam){
+      if (cam!==true && S.info && S.info.camera==='REQUIRED'){
+        exitFs(); $('btnStart').textContent='Start test'; sync();
+        $('loginErr').textContent='The webcam is required for this test. Allow camera access in your browser (or use a device with a webcam) and try again.'+(cam && cam.name ? ' ['+cam.name+']' : '');
+        return;
+      }
+      call('apiLogin', $('usn').value, S.emailToken, $('code').value, navigator.userAgent, S.fp).then(function(r){
+        $('pwd').value='';
+        if (r.done){ exitFs(); return finish(r); }
+        S.token=r.token; S.viol=r.violations; S.maxViol=r.maxViol;
+        $('who').textContent = r.name+' · '+r.usn;
+        S.wmText = r.usn+' · '+r.name;
+        watermark();
+        show('vTest'); S.active=true; document.body.classList.add('locked');
+        history.pushState(null,'',location.href);
+        if (window.screen && window.screen.isExtended) logEvent('EXTENDED_DISPLAY','Second monitor detected');
+        if (r.relogins>0) toast('Resumed (re-login '+r.relogins+' of '+r.maxRelogin+'). The question that was open has been closed.');
+        clearInterval(S.ping); S.ping=setInterval(heartbeat, 20000);
+        startAudioMonitor();
+        if (CAM.stream) startProctor();
+        next();
+      }).catch(function(e){
+        exitFs(); stopCamera(); $('loginErr').textContent=e.message; $('btnStart').textContent='Start test'; sync();
+      });
+     });
+    };
+    if (S.fp) go(); else fingerprint().then(function(f){ S.fp=f; go(); });
+  });
+
+  $('btnDlOnly').addEventListener('click', function(){
+    if ($('pwdBox').classList.contains('hide')) {
+      $('pwdBox').classList.remove('hide');
+      $('loginErr').textContent='Enter your existing test password below, then click the download button again.';
+      $('btnDlOnly').textContent='Download my answer sheet';
+      return;
+    }
+    if (!$('usn').value.trim() || !$('pwd').value.trim()){ $('loginErr').textContent='Enter your USN and password first.'; return; }
+    $('loginErr').textContent='';
+    call('apiLogin', $('usn').value, $('pwd').value, $('code').value, navigator.userAgent, S.fp, true)
+      .then(function(r){ $('pwd').value=''; finish(r); }).catch(function(e){ $('loginErr').textContent=e.message; });
+  });
+
+  // ---------- questions ----------
+  function next(){
+    S.busy=true; $('btnNext').disabled=true;
+    callR('apiQuestion', S.token).then(function(q){
+      if (q.done) return finish(q);
+      render(q);
+    }).catch(fatal);
+  }
+
+  // Freehand sketch stored as compact normalized vector strokes (not a large image).
+  S.sketch=[];
+  var SKETCH_CANVAS=null, SKETCH_CTX=null, SKETCH_ACTIVE=null;
+  function initSketch(canvas, saved){
+    SKETCH_CANVAS=canvas; SKETCH_CTX=canvas.getContext('2d'); S.sketch=Array.isArray(saved)?saved:[];
+    function sizeCanvas(){
+      var r=canvas.getBoundingClientRect(), dpr=Math.max(1,window.devicePixelRatio||1);
+      canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(260*dpr);
+      SKETCH_CTX.setTransform(dpr,0,0,dpr,0,0); redrawSketch();
+    }
+    canvas._resizeSketch=sizeCanvas;
+    sizeCanvas();
+    canvas.addEventListener('pointerdown',function(e){
+      if(!S.active)return; e.preventDefault(); canvas.setPointerCapture(e.pointerId);
+      var r=canvas.getBoundingClientRect(); SKETCH_ACTIVE={w:r.width,h:r.height,pts:[]};
+      SKETCH_ACTIVE.pts.push([Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))]);
+      S.sketch.push(SKETCH_ACTIVE); redrawSketch();
+    });
+    canvas.addEventListener('pointermove',function(e){
+      if(!SKETCH_ACTIVE)return; e.preventDefault(); var r=canvas.getBoundingClientRect();
+      SKETCH_ACTIVE.pts.push([Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))]); redrawSketch();
+    });
+    function stop(){SKETCH_ACTIVE=null;}
+    canvas.addEventListener('pointerup',stop); canvas.addEventListener('pointercancel',stop); canvas.addEventListener('lostpointercapture',stop);
+  }
+  function redrawSketch(){
+    if(!SKETCH_CANVAS||!SKETCH_CTX)return;
+    var c=SKETCH_CANVAS, ctx=SKETCH_CTX, r=c.getBoundingClientRect(), w=r.width||600, h=r.height||260;
+    ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#172033'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.lineJoin='round';
+    (S.sketch||[]).forEach(function(st){
+      if(!st||!st.pts||!st.pts.length)return;
+      ctx.beginPath(); ctx.moveTo(st.pts[0][0]*w,st.pts[0][1]*h);
+      for(var i=1;i<st.pts.length;i++)ctx.lineTo(st.pts[i][0]*w,st.pts[i][1]*h);
+      if(st.pts.length===1){ctx.lineTo(st.pts[0][0]*w+0.1,st.pts[0][1]*h+0.1);}
+      ctx.stroke();
+    });
+  }
+  window.addEventListener('resize',function(){if(SKETCH_CANVAS&&SKETCH_CANVAS.isConnected&&SKETCH_CANVAS._resizeSketch)SKETCH_CANVAS._resizeSketch();});
+
+  function render(q){
+    S.q=q; S.sel=null; S.busy=false; S.keys=0;
+    var now=Date.now(); S.qEnd=now+q.qLeft; S.tEnd=now+q.testLeft; S.qLen0=Math.max(1000,q.qLeft);
+    S.viol=q.violations; S.maxViol=q.maxViol; updViol();
+    $('qNum').textContent='Question '+q.n+' of '+q.total+' · '+q.marks+' mark'+(q.marks>1?'s':'')+' · '+q.topic;
+    $('qText').textContent=q.text;
+    var b=$('qBody'); b.innerHTML='';
+    if (q.type==='mcq'){
+      q.opts.forEach(function(o,i){
+        var btn=document.createElement('button'); btn.type='button'; btn.className='opt';
+        var k=document.createElement('b'); k.textContent=String.fromCharCode(65+i);
+        var s=document.createElement('span'); s.textContent=o;
+        btn.appendChild(k); btn.appendChild(s);
+        btn.addEventListener('click',function(){ S.sel=i; Array.prototype.forEach.call(b.children,function(c,j){ c.classList.toggle('sel', j===i); }); $('btnNext').disabled=false; });
+        b.appendChild(btn);
+      });
+      $('btnNext').disabled=true;
+    } else if (q.type==='prob'){
+      q.parts.forEach(function(pt,j){
+        var wrap=document.createElement('div'); wrap.className='part';
+        var lb=document.createElement('label'); lb.textContent=pt.l+'  ['+pt.mk+' mark'+(pt.mk==1?'':'s')+']'; wrap.appendChild(lb);
+        var w=document.createElement('div'); w.className='num';
+        var inp=document.createElement('input'); inp.className='t pin'; inp.setAttribute('inputmode','decimal'); inp.autocomplete='off'; inp.spellcheck=false; inp.placeholder='Answer';
+        var u=document.createElement('span'); u.textContent=pt.unit;
+        w.appendChild(inp); w.appendChild(u); wrap.appendChild(w); b.appendChild(wrap);
+        inp.addEventListener('beforeinput',function(e){
+          if (e.inputType && /Paste|Drop|insertReplacementText|insertFromYank/i.test(e.inputType)) { e.preventDefault(); logEvent('PASTE_ATTEMPT','problem field'); }
+          else if (e.data && /[^0-9.\-eE]/.test(e.data)) e.preventDefault();
+        });
+        inp.addEventListener('input',function(){
+          var vals=Array.prototype.map.call(b.querySelectorAll('.pin'),function(x){return x.value.trim();});
+          $('btnNext').disabled = !vals.some(function(v){return NUM_RE.test(v);}) || vals.some(function(v){return v && !NUM_RE.test(v);});
+        });
+        if (j===0) setTimeout(function(){ inp.focus(); },50);
+      });
+      var hp=document.createElement('div'); hp.className='hint'; hp.textContent='Numbers only. Leave a part blank if you cannot solve it; each part is marked separately.'; b.appendChild(hp);
+      $('btnNext').disabled=true;
+    } else if (q.type==='desc'){
+      var ta=document.createElement('textarea'); ta.className='t'; ta.id='descIn'; ta.maxLength=q.maxChars;
+      ta.spellcheck=false; ta.setAttribute('autocomplete','off'); ta.setAttribute('autocorrect','off');
+      ta.placeholder='Type your explanation here in your own words. Use short points or sentences.';
+      if (q.draft) { ta.value=q.draft; S.keys=q.draft.length; }
+      var cn=document.createElement('div'); cn.className='cnt';
+      var cl=document.createElement('span'), cr=document.createElement('span'); cn.appendChild(cl); cn.appendChild(cr);
+      b.appendChild(ta); b.appendChild(cn);
+      var sw=document.createElement('div'); sw.className='sketch-wrap';
+      var sh=document.createElement('div'); sh.className='sketch-toolbar';
+      var st=document.createElement('strong'); st.textContent='Freehand sketch (optional)'; sh.appendChild(st);
+      var undo=document.createElement('button'); undo.type='button'; undo.className='ghost'; undo.textContent='Undo';
+      var clear=document.createElement('button'); clear.type='button'; clear.className='ghost'; clear.textContent='Clear sketch';
+      sh.appendChild(undo); sh.appendChild(clear);
+      var cv=document.createElement('canvas'); cv.id='sketchCanvas'; cv.className='sketch-canvas'; cv.setAttribute('aria-label','Freehand sketch canvas');
+      var note=document.createElement('div'); note.className='sketch-note'; note.textContent='Draw with your mouse, touchpad, stylus or finger. The sketch and written explanation are saved together.';
+      sw.appendChild(sh); sw.appendChild(cv); sw.appendChild(note); b.appendChild(sw);
+      initSketch(cv, q.sketch || []);
+      undo.addEventListener('click',function(){ if (S.sketch && S.sketch.length) { S.sketch.pop(); redrawSketch(); } });
+      clear.addEventListener('click',function(){ S.sketch=[]; redrawSketch(); });
+      ta.addEventListener('beforeinput',function(e){
+        if (e.inputType && /Paste|Drop|insertFromYank/i.test(e.inputType)) { e.preventDefault(); logEvent('PASTE_ATTEMPT','descriptive field'); return; }
+        if (/^insert(Text|LineBreak|Paragraph|CompositionText|ReplacementText)$/.test(e.inputType||'')) S.keys += (e.data ? e.data.length : 1);
+      });
+      var upd=function(){ var n=ta.value.trim().split(/\s+/).filter(String).length; cl.textContent=n+' words · auto-saved'; cr.textContent=ta.value.length+' / '+q.maxChars; $('btnNext').disabled = ta.value.trim().length<1; };
+      ta.addEventListener('input',upd); upd();
+      setTimeout(function(){ ta.focus(); },50);
+    } else {
+      var w=document.createElement('div'); w.className='num';
+      var inp=document.createElement('input'); inp.className='t'; inp.id='numIn';
+      inp.setAttribute('inputmode','decimal'); inp.autocomplete='off'; inp.spellcheck=false; inp.placeholder='Your answer';
+      var u=document.createElement('span'); u.textContent=q.unit;
+      w.appendChild(inp); w.appendChild(u); b.appendChild(w);
+      var h=document.createElement('div'); h.className='hint'; h.textContent='Numbers only (e.g. 1234.5). Answers within the allowed tolerance are accepted.'; b.appendChild(h);
+      inp.addEventListener('beforeinput',function(e){
+        if (e.inputType && /Paste|Drop|insertReplacementText|insertFromYank/i.test(e.inputType)) { e.preventDefault(); logEvent('PASTE_ATTEMPT','numeric field'); }
+        else if (e.data && /[^0-9.\-eE]/.test(e.data)) e.preventDefault();
+      });
+      inp.addEventListener('input',function(){ S.sel=inp.value.trim(); $('btnNext').disabled = !NUM_RE.test(S.sel); });
+      inp.addEventListener('keydown',function(e){ if(e.key==='Enter' && !$('btnNext').disabled) $('btnNext').click(); });
+      $('btnNext').disabled=true; setTimeout(function(){ inp.focus(); },50);
+    }
+    $('btnNext').textContent = q.n===q.total ? 'Save & submit test' : 'Save & next';
+    window.scrollTo(0,0);
+    clearInterval(S.tick); S.tick=setInterval(tick,250); tick();
+  }
+
+  function tick(){
+    if (!S.q || S.busy) return;
+    var now=Date.now(), ql=S.qEnd-now, tl=S.tEnd-now;
+    $('qTime').textContent='This question: '+mmss(ql);
+    $('pTest').textContent='Test '+mmss(tl);
+    $('pTest').classList.toggle('hot', tl<120000);
+    var f=$('qFill'); f.style.width=Math.max(0,Math.min(100, ql/S.qLen0*100))+'%'; f.classList.toggle('hot', ql<10000);
+    if (ql<=0 || tl<=0) submit(true);
+  }
+
+  function compactSketch(strokes){
+    var out=[], budget=300;
+    (strokes||[]).forEach(function(st){
+      if(budget<=0||!st||!st.pts||!st.pts.length)return;
+      var pts=st.pts, take=Math.min(24,pts.length,budget), sampled=[];
+      for(var i=0;i<take;i++){var ix=take===1?0:Math.round(i*(pts.length-1)/(take-1));sampled.push([+Number(pts[ix][0]).toFixed(3),+Number(pts[ix][1]).toFixed(3)]);}
+      if(sampled.length){out.push({pts:sampled});budget-=sampled.length;}
+    });
+    return out;
+  }
+  function currentValue(){
+    if (!S.q) return null;
+    if (S.q.type==='desc'){ var ta=$('descIn'); return ta ? {t:ta.value, k:S.keys||0, sketch:compactSketch(S.sketch||[])} : null; }
+    if (S.q.type==='num') return (S.sel!==null && NUM_RE.test(S.sel)) ? S.sel : null;
+    if (S.q.type==='prob') return Array.prototype.map.call(document.querySelectorAll('#qBody .pin'),function(x){ var v=x.value.trim(); return NUM_RE.test(v)?v:null; });
+    return S.sel;
+  }
+
+  function submit(auto){
+    if (S.busy || !S.q) return;
+    S.busy=true; $('btnNext').disabled=true; clearInterval(S.tick);
+    var v=currentValue(), n=S.q.n;
+    if (auto) toast('Time up for this question — answer saved.');
+    callR('apiAnswer', S.token, n, v===undefined?null:v).then(function(r){
+      if (r.done) return callR('apiFinish',S.token).then(finish);
+      next(); // also covers "Out of sequence" (answer already recorded before a lost reply)
+    }).catch(fatal);
+  }
+  $('btnNext').addEventListener('click', function(){ submit(false); });
+
+  function heartbeat(){
+    if (!S.active || !S.token) return;
+    var d = S.q && S.q.type==='desc' && !S.busy ? currentValue() : null;
+    call('apiPing', S.token, S.q ? S.q.n : 0, d).then(function(r){
+      net(false);
+      if (r.done) return finish(r);
+      if (typeof r.testLeft==='number') S.tEnd = Date.now()+r.testLeft; // resync with the server clock
+    }).catch(function(e){ if (isNet(e)) net(true); });
+  }
+
+  // in-page confirm (a native confirm() would blur the window and look like a violation)
+  $('btnFinish').addEventListener('click', function(){ $('ask').classList.add('on'); });
+  $('askNo').addEventListener('click', function(){ $('ask').classList.remove('on'); });
+  $('askYes').addEventListener('click', function(){
+    $('ask').classList.remove('on');
+    S.busy=true; clearInterval(S.tick);
+    var v=currentValue(), n=S.q?S.q.n:0;
+    // save what is on screen, then end
+    (S.q ? callR('apiAnswer', S.token, n, v) : Promise.resolve({})).then(function(){ return callR('apiFinish', S.token); }).then(finish).catch(fatal);
+  });
+
+  function finish(r){
+    S.active=false; clearInterval(S.tick); clearInterval(S.ping); clearTimeout(S.blurTimer); S.token=null; stopCamera();
+    document.body.classList.remove('locked','veiled'); $('shield').classList.remove('on'); $('wm').classList.remove('on');
+    exitFs(); show('vDone');
+    var res=(r&&r.result)||{};
+    $('dScore').textContent = res.score!==undefined ? (Math.round(res.score*100)/100)+' / '+res.max : '';
+    $('dReason').textContent = (res.reason ? 'Status: '+res.reason+'. ' : 'Your answers have been recorded. ') +
+      (res.descMax ? (res.score!==undefined ? 'Score shown is for objective questions; your' : 'Your')+' descriptive answers ('+res.descMax+' marks) will be evaluated and added.' : '');
+    S.dl = r && r.dl;
+    $('dlBox').classList.toggle('hide', !(S.dl && S.dl.allowed));
+    $('dlMsg').textContent = S.dl && !S.dl.allowed ? S.dl.msg : '';
+  }
+
+  function fatal(e){
+    S.busy=false;
+    var m=(e&&e.message)||String(e);
+    S.active=false; clearInterval(S.tick); clearInterval(S.ping); stopCamera();
+    show('vDone'); $('dScore').textContent='';
+    $('dReason').textContent = isNet(e) ? 'Connection lost for too long. Your answers so far are saved on the server. Re-open the test link on this same device and log in again to continue.' : m;
+    $('dlBox').classList.add('hide');
+  }
+
+  // ---------- proctoring ----------
+  function fsEl(){ return document.fullscreenElement || document.webkitFullscreenElement; }
+  function enterFs(){
+    var el=document.documentElement, f=el.requestFullscreen||el.webkitRequestFullscreen;
+    if (!f || !(document.fullscreenEnabled||document.webkitFullscreenEnabled)) { S.fs=false; return; }
+    try { var p=f.call(el); S.fs=true; if (p && p.catch) p.catch(function(){ S.fs=false; }); } catch(e){ S.fs=false; }
+  }
+  function exitFs(){ try{ if(fsEl()) (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(e){} }
+  function updViol(){ $('pViol').textContent='Warnings '+S.viol+'/'+S.maxViol; $('pViol').classList.toggle('hot', S.viol>0); }
+
+  function violation(kind, detail){
+    if (!S.active) return;
+    if (!/^(PHONE_DETECTED|CAMERA_OFF|CAMERA_BLOCKED|NO_PERSON)$/.test(kind)) snap(kind);
+    callR('apiViolation', S.token, kind, detail).then(function(r){
+      if (!S.active) return;
+      if (r.done) return finish(r);
+      S.viol=r.violations; S.maxViol=r.maxViol; updViol();
+    }).catch(function(){});
+    var cam=/^(PHONE_DETECTED|CAMERA_OFF|CAMERA_BLOCKED|NO_PERSON)$/.test(kind);
+    shield('Warning recorded', (cam ? 'Webcam check: '+detail+'. A snapshot has been sent to the instructor.' : 'You left the test window ('+detail+').')+
+      ' After '+S.maxViol+' warnings your test is submitted automatically. The question timer keeps running.');
+  }
+  function logEvent(kind, detail){
+    if (!S.active) return;
+    var now=Date.now(); if (S.lastLog[kind] && now-S.lastLog[kind]<5000) return; S.lastLog[kind]=now;
+    call('apiViolation', S.token, kind, detail).catch(function(){});
+  }
+  function shield(t,m){ $('shTitle').textContent=t; $('shMsg').textContent=m; $('shield').classList.add('on'); }
+  $('btnBack').addEventListener('click',function(){
+    if (document.fullscreenEnabled||document.webkitFullscreenEnabled) enterFs();
+    $('shield').classList.remove('on'); S.away=false; unveil();
+    if (S.active && !CAM.stream && S.info && S.info.camera!=='OFF') startCamera().then(function(){ startProctor(); }).catch(function(){
+      if (S.info.camera==='REQUIRED') shield('Camera needed','Turn your webcam back on and allow access to continue. While it is off, warnings keep being recorded.'); });
+  });
+
+  // hide the question the instant focus is lost — screen-capture tools take focus, so they capture a blank screen
+  function veil(){ if (S.active) document.body.classList.add('veiled'); }
+  function unveil(){ if (document.hasFocus() && !document.hidden) document.body.classList.remove('veiled'); }
+
+  document.addEventListener('visibilitychange',function(){
+    if (!S.active) return;
+    if (document.hidden){ veil(); if (!S.away){ S.away=true; violation('TAB_HIDDEN','switched tab / app or minimised'); } }
+  });
+  // Avoid false-positive warnings caused by transient browser/OS focus changes.
+  // Tab hiding and leaving fullscreen are still monitored separately below.
+  window.addEventListener('blur',function(){
+    if (!S.active) return;
+    clearTimeout(S.blurTimer);
+    veil();
+  });
+  window.addEventListener('focus',function(){
+    clearTimeout(S.blurTimer);
+    if (!$('shield').classList.contains('on')) unveil();
+  });
+  // Moving the pointer to the page edge (for example, toward Save & Next)
+  // is not itself a violation.
+  document.documentElement.addEventListener('mouseleave',function(){ /* no warning */ });
+  document.documentElement.addEventListener('mouseenter',function(){
+    if (!$('shield').classList.contains('on')) unveil();
+  });
+  function onFs(){
+    if (!S.active) return;
+    if (S.fs && !fsEl() && !S.away){ S.away=true; veil(); violation('FULLSCREEN_EXIT','left full screen'); }
+  }
+  document.addEventListener('fullscreenchange',onFs); document.addEventListener('webkitfullscreenchange',onFs);
+
+  // block copy / paste / context menu / drag / select
+  ['copy','cut','paste','contextmenu','dragstart','drop','selectstart'].forEach(function(ev){
+    document.addEventListener(ev,function(e){
+      if (!S.active) return;
+      if (ev==='selectstart' && e.target && (e.target.id==='numIn' || e.target.id==='descIn' || (e.target.classList && e.target.classList.contains('pin')))) return;
+      e.preventDefault();
+      if (ev==='paste' || ev==='drop') logEvent('PASTE_ATTEMPT', ev);
+      if (ev==='copy' || ev==='cut') logEvent('COPY_ATTEMPT', ev);
+    }, true);
+  });
+
+  // block shortcuts; OS/screenshot keys veil the screen at once
+  document.addEventListener('keydown',function(e){
+    if (!S.active) return;
+    var k=(e.key||'').toLowerCase(), mod=e.ctrlKey||e.metaKey;
+    if (k==='meta' || k==='os' || k==='printscreen' || (e.metaKey && e.shiftKey)) { veil(); }
+    var bad = (mod && 'acvxpsuofgjhrnwt'.indexOf(k)>=0 && k.length===1) ||
+              (mod && e.shiftKey && 'ijcks345'.indexOf(k)>=0) ||
+              /^f(1[0-2]|[1-9])$/.test(k) || k==='printscreen' || k==='contextmenu' ||
+              (e.altKey && (k==='arrowleft'||k==='arrowright'||k==='home'||k==='tab'));
+    if (bad){ e.preventDefault(); e.stopPropagation(); if (k==='printscreen') screenshot(); else toast('That key is disabled during the test.'); }
+  }, true);
+  document.addEventListener('keyup',function(e){
+    if (!S.active) return;
+    var k=(e.key||'').toLowerCase();
+    if (k==='printscreen') screenshot();
+    if (k==='meta' || k==='os' || k==='printscreen') setTimeout(unveil, 600);
+  }, true);
+  function screenshot(){
+    veil();
+    try{ navigator.clipboard && navigator.clipboard.writeText(''); }catch(e){}
+    logEvent('SCREENSHOT_KEY','PrintScreen pressed');
+    toast('Screenshots are not allowed. This was recorded.');
+    setTimeout(unveil, 1200);
+  }
+
+  // back button / reload / close
+  window.addEventListener('popstate',function(){ if (S.active){ history.pushState(null,'',location.href); toast('Navigation is disabled during the test.'); } });
+  window.addEventListener('beforeunload',function(e){ if (S.active){ e.preventDefault(); e.returnValue='Leaving will close the current question.'; return e.returnValue; } });
+  window.addEventListener('beforeprint',function(){ if (S.active) logEvent('PRINT_ATTEMPT','print'); });
+
+  // moving identity watermark: any photo of the screen carries the student's USN and the time
+  function watermark(){
+    var wm=$('wm'); wm.innerHTML='';
+    var t=S.wmText+' · '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    for (var y=-1; y<12; y++) for (var x=-1; x<5; x++){
+      var d=document.createElement('div'); d.textContent=t; d.style.left=(x*440+(y%2)*220)+'px'; d.style.top=(y*150)+'px'; wm.appendChild(d);
+    }
+    wm.classList.add('on');
+    wm.style.transform='translate('+Math.round(Math.random()*80-40)+'px,'+Math.round(Math.random()*60-30)+'px)';
+    clearTimeout(S.wmT); S.wmT=setTimeout(function(){ if (S.active) watermark(); }, 15000);
+  }
+
+  // ================= INSTRUCTOR CONSOLE =================
+  var TCH = { pass:'', rows:[] };
+  window.addEventListener('hashchange', function(){ if (!S.active) location.reload(); });
+  function teacherMode(){ return /teacher/i.test(location.hash) || /[?&]teacher\b/i.test(location.search); }
+  if (teacherMode()){
+    show('none'); $('vLogin').classList.add('hide'); $('vTeach').classList.remove('hide');
+    $('tGo').addEventListener('click', function(){ TCH.pass=$('tPass').value; tLoad(); });
+    $('tPass').addEventListener('keydown', function(e){ if (e.key==='Enter') $('tGo').click(); });
+    $('tRefresh').addEventListener('click', tLoad);
+    $('tFilter').addEventListener('input', tDraw);
+    $('tAll').addEventListener('click', tAll);
+  }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function tLoad(){
+    $('tErr').textContent=''; $('tGo').disabled=true;
+    call('apiAdmin', TCH.pass, 'list').then(function(r){
+      TCH.rows=r.rows; $('tLogin').classList.add('hide'); $('tMain').classList.remove('hide'); $('tSub').textContent=r.title;
+      $('tAbsent').textContent = r.absent.length ? 'Not attempted ('+r.absent.length+'): '+r.absent.map(function(a){return a.usn;}).join(', ') : '';
+      tDraw();
+    }).catch(function(e){ $('tErr').textContent=e.message; }).then(function(){ $('tGo').disabled=false; });
+  }
+  function tDraw(){
+    var f=$('tFilter').value.trim().toLowerCase();
+    var rows=TCH.rows.filter(function(x){ return !f || (x.usn+' '+x.name).toLowerCase().indexOf(f)>=0; });
+    var h='<tr><th>USN</th><th>Name</th><th>Objective</th><th>Descriptive</th><th>Total</th><th>Warnings</th><th>Re-logins</th><th>Camera</th><th>Status</th><th>Time</th><th></th></tr>';
+    rows.forEach(function(x){
+      h+='<tr class="'+(x.live?'live':'')+'"><td>'+esc(x.usn)+'</td><td class="w">'+esc(x.name)+'</td><td>'+esc(x.obj||'')+'</td><td>'+esc(x.desc||'')+'</td><td><b>'+esc(x.total||'')+'</b>'+(x.max?' / '+esc(x.max):'')+'</td>'+
+        '<td class="'+(Number(x.viol)>0?'flag':'')+'">'+esc(x.viol)+'</td><td>'+esc(x.relog)+'</td><td class="'+(Number(x.cam)>0?'flag':'')+'">'+esc(x.cam)+(x.snaps?' <a href="'+esc(x.snaps)+'" target="_blank" rel="noopener">photos</a>':'')+'</td>'+
+        '<td class="w">'+esc(x.ended)+'</td><td>'+esc(x.minutes)+'</td><td><button class="ghost" data-v="'+esc(x.usn)+'">View</button> <button class="pri" data-p="'+esc(x.usn)+'">PDF</button></td></tr>';
+    });
+    $('tTable').innerHTML=h; $('tCount').textContent=rows.length+' row(s)';
+    Array.prototype.forEach.call($('tTable').querySelectorAll('button[data-v]'),function(b){ b.addEventListener('click',function(){ tView(b.getAttribute('data-v')); }); });
+    Array.prototype.forEach.call($('tTable').querySelectorAll('button[data-p]'),function(b){ b.addEventListener('click',function(){ tPdf(b.getAttribute('data-p'), b); }); });
+  }
+  function tScript(usn){ return call('apiAdmin', TCH.pass, 'script', usn); }
+  function tView(usn){
+    var v=$('tView'); v.classList.remove('hide'); v.innerHTML='Loading '+esc(usn)+'…'; v.scrollIntoView({behavior:'smooth'});
+    tScript(usn).then(function(r){
+      var h='<h2 style="margin:0 0 4px">'+esc(r.name)+' · '+esc(r.usn)+'</h2><p class="sub">'+esc(r.title)+' · Sheet '+esc(r.id)+'<br>Started '+esc(r.started)+' · Submitted '+esc(r.submitted)+' · '+esc(r.status)+
+        '<br>Warnings '+esc(r.violations)+' · Re-logins '+esc(r.relogins)+' · Camera flags '+esc(r.camFlags)+(r.snaps?' · <a href="'+esc(r.snaps)+'" target="_blank" rel="noopener">webcam photos</a>':'')+
+        '<br><b>Objective '+esc(r.obj)+' / '+esc(r.objMax)+' · Descriptive '+esc(r.desc)+' / '+esc(r.descMax)+' · TOTAL '+esc(r.total)+' / '+esc(r.max)+'</b></p>'+
+        '<button class="pri" id="tVPdf">Download this script (PDF)</button>';
+      r.items.forEach(function(it){
+        h+='<div class="qa"><div class="h">Q'+it.n+' · M'+it.m+' · '+esc(it.t)+' · '+esc(it.type.toUpperCase())+' · '+it.marks+' mark(s)</div><div>'+esc(it.q)+'</div>'+
+          (it.o?'<div class="fb">'+it.o.map(function(o,j){return String.fromCharCode(65+j)+') '+esc(o);}).join('<br>')+'</div>':'')+
+          '<pre>'+esc(it.r)+'</pre>'+(it.sketch&&it.sketch.length?'<div class="hint">Student freehand sketch:</div><canvas class="review-sketch" data-sketch="'+esc(JSON.stringify(it.sketch))+'" width="800" height="260" style="width:100%;max-width:800px;height:260px;border:1px solid #c9ced8;background:#fff;border-radius:6px"></canvas>':'')+(it.note?'<div class="fb">Note: '+esc(it.note)+'</div>':'')+
+          '<div class="k">Key: '+esc(it.key)+'</div><div class="m">Marks: '+(it.got===null||it.got===undefined?'not yet graded':esc(it.got))+' / '+it.marks+'</div>'+
+          (it.fb?'<div class="fb">'+esc(it.fb)+'</div>':'')+'</div>';
+      });
+      v.innerHTML=h;
+      Array.prototype.forEach.call(v.querySelectorAll('canvas.review-sketch'),function(cv){
+        try { var strokes=JSON.parse(cv.getAttribute('data-sketch')||'[]'),ctx=cv.getContext('2d');
+          ctx.strokeStyle='#172033';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+          strokes.forEach(function(st){if(!st||!st.pts||!st.pts.length)return;ctx.beginPath();ctx.moveTo(st.pts[0][0]*cv.width,st.pts[0][1]*cv.height);for(var j=1;j<st.pts.length;j++)ctx.lineTo(st.pts[j][0]*cv.width,st.pts[j][1]*cv.height);ctx.stroke();});
+        } catch(e) {}
+      });
+      $('tVPdf').addEventListener('click',function(){ var b=this; b.disabled=true; loadLibs().then(function(){ buildPdf({rec:r, teacher:true}); }).catch(function(e){ alert(e.message); }).then(function(){ b.disabled=false; }); });
+    }).catch(function(e){ v.innerHTML='<p class="err">'+esc(e.message)+'</p>'; });
+  }
+  function tPdf(usn, btn){
+    if (btn) btn.disabled=true;
+    return Promise.all([tScript(usn), loadLibs()]).then(function(x){ buildPdf({rec:x[0], teacher:true}); })
+      .catch(function(e){ $('tErr').textContent=usn+': '+e.message; }).then(function(){ if (btn) btn.disabled=false; });
+  }
+  function tAll(){
+    var list=TCH.rows.filter(function(x){ return !x.live; }).map(function(x){ return x.usn; });
+    list=list.filter(function(u,i){ return list.indexOf(u)===i; });
+    if (!list.length) return;
+    $('tAll').disabled=true; var i=0;
+    (function nextOne(){
+      if (i>=list.length){ $('tAll').disabled=false; $('tCount').textContent='Downloaded '+list.length+' PDFs'; return; }
+      $('tCount').textContent='Preparing '+(i+1)+' of '+list.length+'…';
+      tPdf(list[i++]).then(function(){ setTimeout(nextOne, 900); });
+    })();
+  }
+
+  // ================= MICROPHONE SOUND-LEVEL MONITORING =================
+  // Consent-based, local-only sound-level monitoring. No audio is recorded,
+  // transcribed, or uploaded. This flags sustained sound for instructor review;
+  // it cannot reliably identify speech or determine whether cheating occurred.
+  var AUD = { stream:null, ctx:null, analyser:null, source:null, timer:null, loud:0, lastFlag:0, unavailable:false };
+  function startAudioMonitor(){
+    if (!S.active || AUD.stream || AUD.unavailable) return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      AUD.unavailable=true; logEvent('MIC_UNAVAILABLE','microphone monitoring not supported by this browser'); return;
+    }
+    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}, video:false}).then(function(st){
+      if (!S.active){ st.getTracks().forEach(function(t){t.stop();}); return; }
+      AUD.stream=st;
+      var AC=window.AudioContext||window.webkitAudioContext;
+      if (!AC){ stopAudioMonitor(); AUD.unavailable=true; logEvent('MIC_UNAVAILABLE','Web Audio API not supported'); return; }
+      AUD.ctx=new AC(); AUD.analyser=AUD.ctx.createAnalyser(); AUD.analyser.fftSize=1024;
+      AUD.source=AUD.ctx.createMediaStreamSource(st); AUD.source.connect(AUD.analyser);
+      var data=new Uint8Array(AUD.analyser.fftSize);
+      AUD.timer=setInterval(function(){
+        if (!S.active || !AUD.analyser) return;
+        AUD.analyser.getByteTimeDomainData(data);
+        var sum=0; for (var i=0;i<data.length;i++){ var x=(data[i]-128)/128; sum+=x*x; }
+        var rms=Math.sqrt(sum/data.length);
+        // Sustained sound is a review flag, not an automatic cheating verdict.
+        AUD.loud = rms>0.055 ? AUD.loud+1 : Math.max(0,AUD.loud-1);
+        if (AUD.loud>=6 && Date.now()-AUD.lastFlag>45000){
+          AUD.lastFlag=Date.now(); AUD.loud=0;
+          snap('AUDIO_ACTIVITY');
+          logEvent('AUDIO_ACTIVITY','sustained microphone sound level; review context, audio not recorded');
+          toast('Sustained sound detected. Please remain silent; this may be reviewed by the instructor.');
+        }
+      }, 500);
+      st.getAudioTracks().forEach(function(t){ t.onended=function(){ if(S.active) logEvent('MIC_UNAVAILABLE','microphone monitoring stopped'); stopAudioMonitor(); }; });
+    }).catch(function(e){
+      AUD.unavailable=true;
+      logEvent('MIC_UNAVAILABLE','microphone permission unavailable: '+String(e&&e.name||'denied'));
+      toast('Microphone monitoring is unavailable; the instructor may review webcam snapshots.');
+    });
+  }
+  function stopAudioMonitor(){
+    clearInterval(AUD.timer); AUD.timer=null;
+    if (AUD.stream){ AUD.stream.getTracks().forEach(function(t){t.onended=null;t.stop();}); AUD.stream=null; }
+    if (AUD.source){ try{AUD.source.disconnect();}catch(e){} AUD.source=null; }
+    if (AUD.ctx){ try{AUD.ctx.close();}catch(e){} AUD.ctx=null; }
+    AUD.analyser=null; AUD.loud=0;
+  }
+
+  // ================= WEBCAM PROCTORING =================
+  // Regular snapshots + browser-side detection of a phone in view, an empty seat, extra people or a covered camera.
+  var CAM = { stream:null, model:null, loop:null, snapT:null, miss:0, phone:0, multi:0, dark:0, last:{} };
+  function startCamera(){
+    if (CAM.stream) return Promise.resolve(CAM.stream);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject(new Error('Camera not supported here'));
+    return navigator.mediaDevices.getUserMedia({ video:{ width:{ideal:640}, height:{ideal:480}, facingMode:'user' }, audio:false }).then(function(st){
+      CAM.stream=st; var v=$('camv'); v.srcObject=st; try{ v.play(); }catch(e){}
+      var tr=st.getVideoTracks()[0];
+      if (tr) { tr.onended=function(){ camEvent('CAMERA_OFF','webcam stopped or disconnected', true); CAM.stream=null; $('cam').classList.remove('on'); }; }
+      return st;
+    });
+  }
+  function stopCamera(){
+    stopAudioMonitor();
+    clearInterval(CAM.loop); clearInterval(CAM.snapT);
+    if (CAM.stream){ CAM.stream.getTracks().forEach(function(t){ t.onended=null; t.stop(); }); CAM.stream=null; }
+    $('cam').classList.remove('on');
+  }
+  function frame(w,h){
+    var v=$('camv'); if (!v.videoWidth) return null;
+    var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(v,0,0,w,h); return c;
+  }
+  function snap(reason){
+    if (!S.active || !CAM.stream) return;
+    var c=frame(320,240); if (!c) return;
+    var g=c.getContext('2d'); g.fillStyle='rgba(0,0,0,.55)'; g.fillRect(0,224,320,16); g.fillStyle='#fff'; g.font='11px Arial';
+    g.fillText(S.wmText+' · '+new Date().toLocaleTimeString()+' · '+reason, 4, 236);
+    call('apiSnap', S.token, c.toDataURL('image/jpeg', 0.6), reason).catch(function(){});
+  }
+  function brightness(){
+    var c=frame(32,24); if (!c) return 255;
+    var d=c.getContext('2d').getImageData(0,0,32,24).data, s=0; for (var i=0;i<d.length;i+=4) s+=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+    return s/(d.length/4);
+  }
+  function camEvent(kind, detail, counts, gapMs){
+    var now=Date.now(); if (CAM.last[kind] && now-CAM.last[kind] < (gapMs||30000)) return; CAM.last[kind]=now;
+    snap(kind);
+    if (counts) violation(kind, detail); else logEvent(kind, detail);
+  }
+  function loadDetector(){
+    if (CAM.model || !S.info || !S.info.phoneDetect) return;
+    var p = window.cocoSsd ? Promise.resolve() :
+      script('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js').then(function(){ return script('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js'); });
+    p.then(function(){ return cocoSsd.load({ base:'lite_mobilenet_v2' }); })
+     .then(function(m){ CAM.model=m; })
+     .catch(function(e){ logEvent('DETECTOR_UNAVAILABLE', String(e && e.message || e).slice(0,120)); });
+  }
+  function check(){
+    if (!S.active) return;
+    if (!CAM.stream){ if (S.info && S.info.camera==='REQUIRED') camEvent('CAMERA_OFF','webcam still off', true, 60000); return; }
+    var br=brightness();
+    CAM.dark = br < 14 ? CAM.dark+1 : 0;
+    if (CAM.dark>=3) camEvent('CAMERA_BLOCKED','webcam covered or too dark', true, 60000);
+    if (!CAM.model || document.hidden) return;
+    CAM.model.detect($('camv'), 10, 0.35).then(function(objs){
+      var phone = objs.some(function(o){ return o.class==='cell phone' && o.score>=0.5; });
+      var people = objs.filter(function(o){ return o.class==='person' && o.score>=0.5; }).length;
+      CAM.phone = phone ? CAM.phone+1 : 0;
+      CAM.miss = people===0 ? CAM.miss+1 : 0;
+      CAM.multi = people>=2 ? CAM.multi+1 : 0;
+      if (CAM.phone>=2) camEvent('PHONE_DETECTED','mobile phone seen by the webcam', true, 30000);
+      if (CAM.miss>=5) camEvent('NO_PERSON','student not visible to the webcam', true, 90000);
+      if (CAM.multi>=2) camEvent('MULTIPLE_PEOPLE','more than one person in view', false, 60000);
+    }).catch(function(){});
+  }
+  function startProctor(){
+    $('cam').classList.add('on');
+    loadDetector();
+    setTimeout(function(){ snap('start'); }, 2500);
+    clearInterval(CAM.snapT); CAM.snapT=setInterval(function(){ snap('periodic'); }, Math.max(15, (S.info && S.info.snapSec) || 60)*1000);
+    clearInterval(CAM.loop); CAM.loop=setInterval(check, 3000);
+  }
+
+  // ================= ANSWER SHEET PDF =================
+  $('btnDl').addEventListener('click', function(){
+    if (!S.dl || !S.dl.token) return;
+    var b=$('btnDl'); b.disabled=true; b.textContent='Preparing your answer sheet…';
+    Promise.all([call('apiSheet', S.dl.token), loadLibs()]).then(function(x){ return buildPdf(x[0]); })
+      .then(function(){ b.textContent='Download again (new numbered copy)'; b.disabled=false; })
+      .catch(function(e){ b.disabled=false; b.textContent='Download answer sheet (PDF)'; $('dlMsg').textContent='Could not create the PDF: '+((e&&e.message)||e); });
+  });
+
+  var LIBS = { jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+               qr:'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js',
+               font:'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf',
+               fontB:'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans-Bold.ttf' };
+  function script(src){ return new Promise(function(res,rej){ var s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=function(){ rej(new Error('could not load '+src)); }; document.head.appendChild(s); }); }
+  function b64(url){ return fetch(url).then(function(r){ if(!r.ok) throw new Error('font'); return r.arrayBuffer(); }).then(function(buf){
+    var u=new Uint8Array(buf), s='', CH=0x8000; for (var i=0;i<u.length;i+=CH) s+=String.fromCharCode.apply(null,u.subarray(i,i+CH)); return btoa(s); }); }
+  var libsP=null;
+  function loadLibs(){
+    if (libsP) return libsP;
+    libsP = Promise.all([ window.jspdf ? 1 : script(LIBS.jspdf), window.qrcode ? 1 : script(LIBS.qr),
+      b64(LIBS.font).catch(function(){ return null; }), b64(LIBS.fontB).catch(function(){ return null; }) ])
+      .then(function(r){ S.font=r[2]; S.fontB=r[3]; });
+    libsP.catch(function(){ libsP=null; });
+    return libsP;
+  }
+  // fallback when the Unicode font cannot be fetched
+  function ascii(s){ var m={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','⁰':'^0','¹':'^1','⁴':'^4','⁵':'^5','⁶':'^6','⁷':'^7','⁸':'^8','⁹':'^9','⁺':'+','⁻':'-','→':'->','←':'<-','−':'-','≈':'~','Ω':'ohm','Δ':'d','τ':'tau','η':'eta','ρ':'rho','↑':'(up)','≤':'<=','≥':'>='};
+    return String(s).replace(/[₀-₄⁰¹⁴-⁹⁺⁻→←−≈ΩΔτηρ↑≤≥]/g,function(c){return m[c]||'?';}); }
+
+  function buildPdf(d){
+    var J=window.jspdf.jsPDF, rec=d.rec;
+    var owner = Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(18)),function(x){return ('0'+x.toString(16)).slice(-2);}).join('');
+    var doc=new J({unit:'mm', format:'a4', compress:true,
+      encryption:{ userPassword:'', ownerPassword: owner, userPermissions:['print'] }});
+    var uni = !!(S.font);
+    if (uni){
+      doc.addFileToVFS('DejaVuSans.ttf', S.font); doc.addFont('DejaVuSans.ttf','DV','normal');
+      if (S.fontB){ doc.addFileToVFS('DejaVuSans-Bold.ttf', S.fontB); doc.addFont('DejaVuSans-Bold.ttf','DV','bold'); }
+    }
+    var FN = uni ? 'DV' : 'helvetica';
+    var T = uni ? function(s){ return String(s); } : ascii;
+    function font(style,size){ doc.setFont(FN, (style==='bold' && (!uni || S.fontB)) ? 'bold' : 'normal'); doc.setFontSize(size); }
+    var W=210, H=297, M=16, CW=W-2*M, y=0, page=0;
+    var TCH = !!d.teacher;
+    var idTxt = rec.id, shaShort = TCH ? 'INSTRUCTOR' : String(d.sha).slice(0,16).toUpperCase();
+    var A7 = function(s){ return String(s).replace(/[^\x20-\x7e]/g,'-'); }; // metadata must be plain ASCII under encryption
+    doc.setProperties({ title: A7('Answer sheet '+rec.id+' - '+rec.usn), subject: A7(rec.title+' / '+rec.course), author: A7(rec.institute),
+      keywords: rec.id+' '+d.sha+' copy '+d.copy, creator:'NTM Test Server (verifiable)' });
+
+    var qrc = null;
+    if (d.verify && window.qrcode){ qrc=qrcode(0,'M'); qrc.addData(d.verify); qrc.make(); }
+    function drawQR(x0,y0,size){
+      if (!qrc) return; var n=qrc.getModuleCount(), s=size/n; doc.setFillColor(255,255,255); doc.rect(x0-1,y0-1,size+2,size+2,'F'); doc.setFillColor(0,0,0);
+      for (var r=0;r<n;r++) for (var c=0;c<n;c++) if (qrc.isDark(r,c)) doc.rect(x0+c*s, y0+r*s, s+0.01, s+0.01, 'F');
+    }
+    function background(){
+      // fine security guilloche (very light) — breaks up on photocopies / scans
+      doc.setLineWidth(0.12);
+      for (var k=0;k<34;k++){
+        var col=[205+((k*7)%30), 220+((k*3)%25), 240]; doc.setDrawColor(col[0],col[1],col[2]);
+        var segs=[], px=0, py=0, amp=3+(k%5), ph=k*0.55, base=8+k*8.4, prevy=base+amp*Math.sin(ph);
+        for (var i=1;i<=70;i++){ var xx=i*3, yy=base+amp*Math.sin(xx/9+ph)+1.6*Math.sin(xx/3.1+k); segs.push([3, yy-prevy]); prevy=yy; }
+        doc.lines(segs, 0, base+amp*Math.sin(ph));
+      }
+      // diagonal identity watermark
+      doc.setGState(new doc.GState({opacity:0.09}));
+      font('bold',30); doc.setTextColor(30,40,90);
+      [[30,95],[25,185],[30,270]].forEach(function(p){ doc.text(T(TCH ? 'INSTRUCTOR COPY' : rec.usn+' · COPY '+d.copy), p[0], p[1], {angle:32}); });
+      font('bold',13);
+      [[60,60],[55,150],[60,240]].forEach(function(p){ doc.text(T(rec.name+' · '+rec.id), p[0], p[1], {angle:32}); });
+      doc.setGState(new doc.GState({opacity:1}));
+      // border with micro-text line (readable only when zoomed in)
+      doc.setDrawColor(40,55,110); doc.setLineWidth(0.5); doc.rect(8,8,W-16,H-16);
+      doc.setLineWidth(0.15); doc.rect(9.4,9.4,W-18.8,H-18.8);
+      font('normal',2.1); doc.setTextColor(60,75,130);
+      var micro=T(('MITE·NTM·'+rec.id+'·'+rec.usn+'·'+shaShort+'·').repeat(12));
+      doc.text(micro, 10.2, 8.9, {maxWidth: W-20}); doc.text(micro, 10.2, H-7.9, {maxWidth: W-20});
+      doc.setTextColor(0,0,0);
+    }
+    function newPage(){ if (page>0) doc.addPage(); page++; background(); y=M+2; }
+    function need(h){ if (y+h > H-30) newPage(); }
+    function para(txt, size, style, indent, color){
+      font(style||'normal', size); if (color) doc.setTextColor(color[0],color[1],color[2]);
+      var lines=doc.splitTextToSize(T(txt), CW-(indent||0)), lh=size*0.42;
+      lines.forEach(function(l){ need(lh+1); doc.text(l, M+(indent||0), y); y+=lh; });
+      doc.setTextColor(0,0,0);
+    }
+
+    newPage();
+    // header
+    var HW = CW-36; // keep clear of the QR code
+    font('bold',12); doc.splitTextToSize(T(rec.institute), HW).forEach(function(l){ doc.text(l, M, y+2); y+=5.4; }); y+=1.2;
+    font('normal',10); doc.text(doc.splitTextToSize(T(rec.course), HW)[0], M, y); y+=5.5;
+    font('bold',14.5); doc.splitTextToSize(T(rec.title), HW).forEach(function(l){ doc.text(l, M, y+1); y+=6.4; }); y+=0.6;
+    font('bold',9); doc.setTextColor(150,20,20); doc.text(doc.splitTextToSize(T(TCH ? 'EVALUATED ANSWER SCRIPT — INSTRUCTOR COPY (CONFIDENTIAL)' : 'STUDENT ANSWER SHEET — COMPUTER-GENERATED, DIGITALLY SEALED'), HW), M, y); doc.setTextColor(0,0,0); y+=4;
+    drawQR(W-M-30, M-1, 30);
+    if (qrc){ font('normal',6.5); doc.text(T('Scan to verify'), W-M-15, M+32.5, {align:'center'}); }
+    // candidate block
+    y=Math.max(y+2, M+36); doc.setDrawColor(120,130,160); doc.setLineWidth(0.3); doc.setFillColor(245,247,252);
+    var rows=[['Name',rec.name],['USN',rec.usn],['Answer sheet ID',rec.id],['Test started',rec.started],['Test submitted',rec.submitted],
+      ['Time taken',rec.minutes+' min'],['Status',rec.status],['Warnings / re-logins',rec.violations+' / '+rec.relogins],
+      ['Objective score', rec.objective ? (Math.round(rec.objective.score*100)/100)+' / '+rec.objective.max : 'withheld by instructor'],
+      ['Descriptive', rec.descMax ? rec.descMax+' marks — evaluated separately' : '—'],
+      ['This copy','No. '+d.copy+', issued '+d.issued]];
+    if (TCH) rows=[['Name',rec.name],['USN',rec.usn],['Answer sheet ID',rec.id],['Test started',rec.started],['Test submitted',rec.submitted],
+      ['Time taken',rec.minutes+' min'],['Status',rec.status],['Warnings / re-logins / camera flags',rec.violations+' / '+rec.relogins+' / '+rec.camFlags],
+      ['Objective marks',rec.obj+' / '+rec.objMax],['Descriptive marks',rec.desc+' / '+rec.descMax+(rec.items.some(function(i){return i.type==='desc'&&i.got===null;})?'  (some not yet graded)':'')],
+      ['TOTAL',rec.total+' / '+rec.max],['Generated',rec.generated]];
+    var bh=rows.length*5.6+4; doc.rect(M, y, CW, bh, 'FD'); var yy=y+5.2;
+    rows.forEach(function(r){ font('bold',9); doc.text(T(r[0]), M+3, yy); font('normal',9); doc.text(doc.splitTextToSize(T(String(r[1])), CW-50)[0], M+46, yy); yy+=5.6; });
+    y+=bh+7;
+
+    // responses
+    rec.items.forEach(function(it){
+      need(18);
+      font('bold',9.5); doc.setTextColor(31,79,209);
+      doc.text(T('Q'+it.n+'  ·  Module '+it.m+' · '+it.t+' · '+(it.type==='mcq'?'MCQ':it.type==='num'?'Numerical':it.type==='prob'?'Numerical problem':'Descriptive')+' · '+it.marks+' mark'+(it.marks>1?'s':'')), M, y);
+      doc.setTextColor(0,0,0); y+=5;
+      para(it.q, 9.5, 'normal');
+      if (it.o){ y+=0.5; it.o.forEach(function(o,j){ para(String.fromCharCode(65+j)+') '+o, 9, 'normal', 5, [70,70,70]); }); }
+      y+=1.5;
+      font('bold',9); need(6); doc.text(T('Response:'), M, y);
+      var rx=M+20, rl=doc.splitTextToSize(T(it.r), CW-20), lh=9*0.42;
+      font('normal',9);
+      rl.forEach(function(l,ix){ need(lh+1); doc.setFillColor(252,250,232); doc.rect(rx-1.5, y-3.1, CW-17, lh+0.9, 'F'); doc.text(l, rx, y); y+=lh; });
+      if (it.sketch && it.sketch.length) {
+        need(48); y+=2; font('bold',8); doc.text(T('Freehand sketch:'), M+20, y); y+=2;
+        var sx=M+20, sy=y, sw=CW-22, sh=39;
+        doc.setDrawColor(190,195,205); doc.setLineWidth(0.25); doc.rect(sx,sy,sw,sh);
+        doc.setDrawColor(23,32,51); doc.setLineWidth(0.45);
+        it.sketch.forEach(function(st){
+          if(!st||!st.pts||st.pts.length<1)return;
+          for(var si=1;si<st.pts.length;si++){
+            var p1=st.pts[si-1],p2=st.pts[si];
+            doc.line(sx+Math.max(0,Math.min(1,p1[0]))*sw,sy+Math.max(0,Math.min(1,p1[1]))*sh,
+                     sx+Math.max(0,Math.min(1,p2[0]))*sw,sy+Math.max(0,Math.min(1,p2[1]))*sh);
+          }
+        });
+        y+=sh+3;
+      }
+      if (it.note){ para('Note: '+it.note, 8, 'normal', 20, [150,90,0]); }
+      if (TCH){
+        y+=0.5; para('Key: '+it.key, 8.3, 'normal', 20, [19,122,63]);
+        para('Marks awarded: '+(it.got===null||it.got===undefined ? 'not yet graded' : it.got)+' / '+it.marks, 8.8, 'bold', 20, [150,20,20]);
+        if (it.fb) para(it.fb, 7.8, 'normal', 20, [80,80,80]);
+      }
+      y+=3; doc.setDrawColor(225,228,236); doc.setLineWidth(0.2); doc.line(M, y-1.5, W-M, y-1.5); y+=2.5;
+    });
+
+    need(26);
+    if (!TCH) para('Declaration: this answer sheet was generated by the test server from the responses recorded during the test. It carries a SHA-256 fingerprint and an instructor-held HMAC seal. Scan the QR code (or open the link below) to see the original record; any difference between this copy and the record means the copy has been altered.', 7.8, 'normal', 0, [70,70,70]);
+    if (d.verify) para('Verify: '+d.verify, 7, 'normal', 0, [31,79,209]);
+
+    // footer on every page
+    var total=doc.getNumberOfPages();
+    for (var p=1;p<=total;p++){
+      doc.setPage(p);
+      doc.setDrawColor(40,55,110); doc.setLineWidth(0.2); doc.line(M, H-26, W-M, H-26);
+      font('normal',7); doc.setTextColor(40,40,40);
+      if (TCH){
+        doc.text(T('Instructor copy  ·  '+idTxt+'  ·  '+rec.usn+'  ·  Generated '+rec.generated+'  ·  Page '+p+' of '+total), M, H-22);
+        font('normal',6.3); doc.text(T('Confidential — contains the answer key. Do not share with students.'), M, H-18.5);
+      } else {
+      doc.text(T('Sheet '+idTxt+'  ·  '+rec.usn+'  ·  Copy '+d.copy+'  ·  Issued '+d.issued+'  ·  Page '+p+' of '+total), M, H-22);
+      font('normal',6.3);
+      doc.text(T('SHA-256: '+d.sha), M, H-18.5);
+      doc.text(T('Seal: '+d.seal+'   ·   Downloaded copies are numbered and logged on the server.'), M, H-15.3);
+      }
+      if (p>1) drawQR(W-M-15, H-25, 14);
+      doc.setTextColor(0,0,0);
+    }
+    var fname = TCH ? 'Evaluated_'+rec.usn+'_'+rec.name.replace(/[^A-Za-z0-9]+/g,'_')+'.pdf' : 'AnswerSheet_'+rec.usn+'_'+rec.id+'_copy'+d.copy+'.pdf';
+    doc.save(fname);
+    if (TCH) return;
+    // fallback link in case the browser blocks the automatic download
+    try{
+      var url=URL.createObjectURL(doc.output('blob'));
+      var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.textContent='If the download did not start, tap here to open the PDF';
+      $('dlMsg').innerHTML=''; $('dlMsg').appendChild(a);
+    }catch(e){}
+  }
+})();
+</script>
+</body>
+</html>
